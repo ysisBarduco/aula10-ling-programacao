@@ -44,7 +44,6 @@ int main(){
   }
 
   //Libera a memória
-  vetor = (int*) realloc(vetor, 0 * sizeof(int));
   free(vetor);
 
   return 0;
