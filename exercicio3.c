@@ -10,69 +10,92 @@ Exercício 3: Lista de Compras Dinâmica
 #include <stdlib.h>
 #include <string.h>
 
-void exibirLista(char **listaCompras, int quantidadeItens) {
+// Estrutura
+typedef struct {
+    char produto[50];
+    float preco;
+} Compra;
+
+
+// Protótipos
+void exibirLista(Compra listaCompras[], int quantidadeItens);
+
+// Declarção de funções
+void exibirLista(Compra listaCompras[], int quantidadeItens){
+    int i;
+
     printf("\n== LISTA DE COMPRAS ==\n");
-    for(int i = 0; i < quantidadeItens; i++){
-        printf("%d. %s\n", i + 1, listaCompras[i]);
+    for(i = 0; i < quantidadeItens; i++){
+        printf("- %s R$%.2f\n", listaCompras[i].produto, listaCompras[i].preco);
     }
 }
 
+
 int main(){
-    int quantidade = 2;
-    int quantidadeNovosItens;
     int i;
+    int quantidadeItens, novaQuantidade;
+    Compra *lista;
 
-    //Começa com uma lista de 2 itens
-    char **lista = (char**) malloc(quantidade * sizeof(char));
+    // Começa com uma lista de 2 itens
+    quantidadeItens = 2;
+    lista = (Compra*) malloc(quantidadeItens * sizeof(Compra));
 
+    //Verifica se a alocação foi bem sucedida
     if(lista == NULL){
         printf("\nErro ao alocar lista!\n");
         return 1;
     }
 
-    for(i = 0; i < quantidade; i++){
-        lista[i] = (char*) malloc(50 * sizeof(char)); //Aloca espaço para os caracteres das palavras, máximo de 50 caracteres
-        if(lista[i] == NULL){
-            printf("\nErro ao alocar lista[%d]!\n", i);
-            return 1;
-        }
+    // Adiciona os itens iniciais
+    for(i = 0; i < quantidadeItens; i++){
+        strcpy(lista[i].produto, "Item");
+        lista[i].preco = 0.00;
     }
 
-    strcpy(lista[0], "Item 1");
-    strcpy(lista[1], "Item 2");
+    exibirLista(lista, quantidadeItens);
 
-    exibirLista(lista, quantidade);
-
-    //Permite ao usuário adicionar itens dinâmicamente
     do{
+        // Pergunta ao usuário quantos itens deseja adicionar
         printf("Quantos itens deseja adicionar? ");
-        scanf("%d", &quantidadeNovosItens);
-        
-        if(quantidadeNovosItens < 0){
-            printf("\nQuantidade inválida! Digite novamente.");
+        scanf("%d", &novaQuantidade);
+
+        if(novaQuantidade == 0){
+            printf("\nAdicao de itens finalizada! Exibindo lista...\n");
+            exibirLista(lista, quantidadeItens);
         }
-    }while(quantidadeNovosItens < 0);
+        else if(novaQuantidade > 0){
+            // Soma o número de novos itens a quantidade atual
+            novaQuantidade += quantidadeItens;
 
-    //Soma a qauntidade de novos itens a quantidade de itens atual
-    quantidade += quantidadeNovosItens;
+            // Realoca a lista
+            lista = (Compra*) realloc(lista, novaQuantidade * sizeof(Compra));
 
-    //Usa realloc() para expandir a lista
-    **lista = (char**) realloc(lista, quantidade * sizeof(char*));
+            // Verifica a realocação
+            if(lista == NULL){
+                printf("\nErro ao realocar lista!\n");
+                return 1;
+            }
 
-    printf("\nDigite: \n");
-    for(i = 0; i < quantidade; i++){
-        printf(" o novo item %d: ", i + 1);
-        scanf(" %49[\n]", lista[i]);
-    }
+            // Pede para o usuário entrar com os novos itens
+            for(i = quantidadeItens; i < novaQuantidade; i++){
+                printf("\n%d produto: ", i + 1);
+                printf("\n Nome: "); scanf(" %[^\n]", lista[i].produto);
+                printf("\n Preco: "); scanf(" %f", &lista[i].preco);
+            }
 
-    //Exibe todos os itens ao final
-    exibirLista(lista, quantidade);
+            // Define a nova quantidade como a quantidade atual
+            quantidadeItens = novaQuantidade;
 
-    //Libera a memória
-    for(i = 0; i < quantidade; i++){
-        free(lista[i]);
-    }
+            printf("\nNovos itens adicionados!\n");
+            // Exibe todos os itens ao final
+            exibirLista(lista, quantidadeItens);
+        }
+        else{
+            printf("\nQuantidade inavlida! Digite um valor maior que 0, ou digite 0 para finalizar.\n");
+        }
+
+    } while(novaQuantidade != 0);
+
     free(lista);
-    
     return 0;
 }
